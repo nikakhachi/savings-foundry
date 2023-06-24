@@ -23,11 +23,23 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         /// @dev updates the balance property with deposit() or withdraw()
         uint rewards;
         uint lastBalanceUpdateTimestamp; /// @dev timestamp of the last updated balance
+        uint totalRewardsClaimed; /// @dev total rewards that the address has claimed of specific token
     }
 
     /// @dev Balance states for each token for each user
     mapping(address => mapping(address => BalanceState))
         public userBalanceStates;
+
+    /// @dev if the address collects this amount or more tokens as rewards, they will
+    /// @dev be able to recieve the 120% (premiumTierInterestPercentage) of the original rate
+    /// @dev on that specific token
+    /// @dev TODO This implementation isn't perfect because totalClaimedRewardsCheckpoint only applies
+    /// @dev TODO to the rewards that been claimed and is in `totalRewardsClaimed` property, so if the
+    /// @dev TODO address just  deposits lots of amount of tokens and doesn't touch it for years, even though
+    /// @dev TODO the rewards itself will be huge, it won't be updated in the state because the address
+    /// @dev TODO hasn't called any functions that would trigger the rewards update in state.
+    uint public immutable totalClaimedRewardsCheckpoint = 10 * 10 ** 18;
+    uint8 public constant premiumTierInterestPercentage = 120;
 
     /// @dev Contract constructor.
     /// @dev We can also implement setting of the initial tokens and their rates here
@@ -63,11 +75,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         /// @dev if the address already has a deposit under this token, first calculate the rewards
         /// @dev for that balance and than update the state
         if (balanceState.lastBalanceUpdateTimestamp != 0) {
-            uint rewards = _calculateRewards(
-                _token,
-                balanceState.balance,
-                balanceState.lastBalanceUpdateTimestamp
-            );
+            uint rewards = _calculateRewards(_token, balanceState);
             balanceState.rewards += rewards;
         }
         balanceState.balance += _amount;
@@ -86,11 +94,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
             _token
         ];
         require(balanceState.balance >= _amount);
-        uint rewards = _calculateRewards(
-            _token,
-            balanceState.balance,
-            balanceState.lastBalanceUpdateTimestamp
-        );
+        uint rewards = _calculateRewards(_token, balanceState);
         balanceState.rewards += rewards;
         balanceState.balance -= _amount;
         balanceState.lastBalanceUpdateTimestamp = block.timestamp;
@@ -113,6 +117,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         ];
         require(balanceState.rewards >= _amount);
         balanceState.rewards -= _amount;
+        balanceState.totalRewardsClaimed += _amount;
         IERC20(_token).transfer(msg.sender, _amount);
         uint balance = IERC20(_token).balanceOf(address(this));
         if (balance <= balanceAlertThreshold)
@@ -130,11 +135,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         BalanceState storage balanceState = userBalanceStates[msg.sender][
             _token
         ];
-        uint rewards = _calculateRewards(
-            _token,
-            balanceState.balance,
-            balanceState.lastBalanceUpdateTimestamp
-        );
+        uint rewards = _calculateRewards(_token, balanceState);
         totalRewards = rewards + balanceState.rewards;
     }
 
@@ -166,17 +167,20 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
 
     /// @dev Private function for calculating rewards based on the balance, duration and the interest %
     /// @param _token token address
-    /// @param _balance address' balance for that token
-    /// @param _lastBalanceUpdateTimestamp timestamp of last updated balance
+    /// @param balanceState struct of the BalanceState
     /// @return earnedRewards final calculated rewards earned
     function _calculateRewards(
         address _token,
-        uint _balance,
-        uint _lastBalanceUpdateTimestamp
+        BalanceState memory balanceState
     ) private view returns (uint earnedRewards) {
-        uint duration = block.timestamp - _lastBalanceUpdateTimestamp;
+        uint duration = block.timestamp -
+            balanceState.lastBalanceUpdateTimestamp;
+        uint rate = balanceState.totalRewardsClaimed >=
+            totalClaimedRewardsCheckpoint
+            ? (tokenAnnualRates[_token] * premiumTierInterestPercentage) / 100
+            : tokenAnnualRates[_token];
         earnedRewards =
-            (_balance * duration * tokenAnnualRates[_token]) /
+            (balanceState.balance * duration * rate) /
             (365 * 24 * 60 * 60); /// @dev calculating % for 1 second
     }
 }
