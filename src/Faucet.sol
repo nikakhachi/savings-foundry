@@ -34,18 +34,18 @@ contract Faucet {
     /// @dev Function to withdraw tokens from the faucet.
     /// @notice Users can call this function to withdraw tokens from the faucet.
     function withdraw() external {
-        if (msg.sender == address(0)) revert InvalidAddress(); // Check if the sender address is invalid
+        if (msg.sender == address(0)) revert InvalidAddress(); /// @dev Check if the sender address is invalid
 
-        // Check if the faucet has insufficient funds
+        /// @dev Check if the faucet has insufficient funds
         if (token.balanceOf(address(this)) < withdrawableAmount)
             revert InsufficientFunds();
 
-        // Make sure that user hasn't already withdrawn within the cooldown time
+        /// @dev Make sure that user hasn't already withdrawn within the cooldown time
         if (withdrawalTimes[msg.sender] > block.timestamp)
             revert TooManyRequests();
 
-        withdrawalTimes[msg.sender] = block.timestamp + cooldown; // Set the withdrawal timestamp for the user
-        token.transfer(msg.sender, withdrawableAmount); // Transfer tokens from the faucet to the user
-        emit Withdraw(msg.sender, block.timestamp); // Emit the Withdraw event
+        withdrawalTimes[msg.sender] = block.timestamp + cooldown; /// @dev Set the withdrawal timestamp for the user
+        token.transfer(msg.sender, withdrawableAmount); /// @dev Transfer tokens from the faucet to the user
+        emit Withdraw(msg.sender, block.timestamp); /// @dev Emit the Withdraw event
     }
 }
