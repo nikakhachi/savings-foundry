@@ -104,7 +104,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     /// @dev because interest isn't given on reward amount (explained in comments of deposit())
     /// @param _token token address to withdraw rewards from
     /// @param _amount amount to withdraw rewards from
-    function getRewards(
+    function claimRewards(
         address _token,
         uint _amount
     ) external checkToken(_token) {
