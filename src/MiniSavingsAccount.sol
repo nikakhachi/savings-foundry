@@ -121,6 +121,32 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
             emit LowBalanceAlert(_token, balance, block.timestamp);
     }
 
+    /// @notice get all the supported tokens with their interest rates
+    /// @dev pagination is included in function because of the array is huge,
+    /// @dev we want to avoid iterating and returning this huge list
+    /// @param _page number of page to return
+    /// @param _itemsPerPage number of tokens per page
+    function getSupportedTokens(
+        uint _page,
+        uint _itemsPerPage
+    ) public view returns (address[] memory, uint16[] memory) {
+        address[] memory addresses = new address[](supportedTokens.length);
+        uint16[] memory annualInterestRates = new uint16[](
+            supportedTokens.length
+        );
+        uint k;
+        for (
+            uint i = _itemsPerPage * (_page - 1);
+            i < _itemsPerPage * _page;
+            i++
+        ) {
+            address token = supportedTokens[i];
+            addresses[k] = token;
+            annualInterestRates[k] = tokenAnnualRates[token];
+        }
+        return (addresses, annualInterestRates);
+    }
+
     /// @dev Private function for calculating rewards based on the balance, duration and the interest %
     /// @param _token token address
     /// @param _balance address' balance for that token

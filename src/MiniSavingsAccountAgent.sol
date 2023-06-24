@@ -60,6 +60,9 @@ contract MiniSavingsAccountAgent {
     /// @dev If the annual rate for token is 0 (default), it means that the token isn't supported
     mapping(address => uint16) public tokenAnnualRates;
 
+    /// @dev list of supported tokens
+    address[] public supportedTokens;
+
     struct NewTokenProposal {
         uint id;
         address token;
@@ -169,6 +172,7 @@ contract MiniSavingsAccountAgent {
         } else {
             tokenAnnualRates[proposal.token] = proposal.annualRate;
             proposal.status = ProposalStatus.EXECUTED;
+            supportedTokens.push(proposal.token);
             emit NewTokenProposalExecuted(id);
         }
     }
