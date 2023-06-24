@@ -28,18 +28,13 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         public userBalanceStates;
 
     /// @dev Contract constructor.
+    /// @dev We can also implement setting of the initial tokens and their rates here
     /// @param _agentsOtherThanSender list of addresses (agents) that will be able to vote, MSG.SENDER shouldn't be here
-    /// @param _supportedTokens Tokens that will be supported initially
-    /// @param _tokenAnnualRates Annual rates of the respective _supportedTokens
     constructor(
         address[] memory _agentsOtherThanSender,
         address[] memory _supportedTokens,
         uint16[] memory _tokenAnnualRates
     ) {
-        require(_supportedTokens.length == _tokenAnnualRates.length);
-        for (uint i = 0; i < _supportedTokens.length; i++) {
-            tokenAnnualRates[_supportedTokens[i]] = _tokenAnnualRates[i];
-        }
         isAgent[msg.sender] = true;
         for (uint i = 0; i < _agentsOtherThanSender.length; i++) {
             isAgent[_agentsOtherThanSender[i]] = true;
