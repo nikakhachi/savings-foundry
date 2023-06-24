@@ -18,9 +18,11 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     uint public constant balanceAlertThreshold = 3000 * 10 ** 18;
 
     struct BalanceState {
-        uint balance;
+        uint balance; /// @dev amount of token that user has deposited and is "saving"
+        /// @dev amount of token that user gets as a reward based on the balance, gets updated when user
+        /// @dev updates the balance property with deposit() or withdraw()
         uint rewards;
-        uint lastBalanceUpdateTimestamp;
+        uint lastBalanceUpdateTimestamp; /// @dev timestamp of the last updated balance
     }
 
     /// @dev Balance states for each token for each user
