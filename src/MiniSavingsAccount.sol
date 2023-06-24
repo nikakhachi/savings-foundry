@@ -180,7 +180,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
             ? (tokenAnnualRates[_token] * premiumTierInterestPercentage) / 100
             : tokenAnnualRates[_token];
         earnedRewards =
-            (balanceState.balance * duration * rate) /
+            ((balanceState.balance * duration * rate) / 10000) /
             (365 * 24 * 60 * 60); /// @dev calculating % for 1 second
     }
 }

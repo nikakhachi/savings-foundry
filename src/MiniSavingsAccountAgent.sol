@@ -56,7 +56,7 @@ contract MiniSavingsAccountAgent {
     /// @dev During this interval agents will be able to vote
     uint public newTokenProposalDuration = 1 weeks;
 
-    /// @dev mapping of tokens with their annual rates
+    /// @dev mapping of tokens with their annual rates. FORMAT  350 = 3.50%
     /// @dev If the annual rate for token is 0 (default), it means that the token isn't supported
     mapping(address => uint16) public tokenAnnualRates;
 
@@ -91,7 +91,7 @@ contract MiniSavingsAccountAgent {
 
     /// @dev Proposing the addition of a new token
     /// @param _token token address that is proposed
-    /// @param _annualRate annual interest rate of the proposed token
+    /// @param _annualRate annual interest rate of the proposed token. FORMAT  350 = 3.50%
     function proposeNewToken(
         address _token,
         uint16 _annualRate
