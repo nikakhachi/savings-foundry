@@ -7,6 +7,12 @@ error UnsupportedToken();
 
 contract MiniSavingsAccount is MiniSavingsAccountAgent {
     event Deposit(address indexed depositor, address token, uint amount);
+    event LowBalanceAlert(address indexed token, uint balance, uint timestamp);
+
+    /// @dev If the balance hits this number, LowBalanceAlert will be evoked.
+    /// @dev Can be implemented that it's unique for each token and also modifible,
+    /// @dev but let's leave it like that for now.
+    uint public constant balanceAlertThreshold = 3000 * 10 ** 18;
 
     struct BalanceState {
         uint balance;
@@ -85,6 +91,9 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         require(balanceState.rewards >= _amount);
         balanceState.rewards -= _amount;
         IERC20(_token).transfer(msg.sender, _amount);
+        uint balance = IERC20(_token).balanceOf(address(this));
+        if (balance <= balanceAlertThreshold)
+            emit LowBalanceAlert(_token, balance, block.timestamp);
     }
 
     function _calculateRewards(
