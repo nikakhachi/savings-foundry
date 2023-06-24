@@ -30,11 +30,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     /// @dev Contract constructor.
     /// @dev We can also implement setting of the initial tokens and their rates here
     /// @param _agentsOtherThanSender list of addresses (agents) that will be able to vote, MSG.SENDER shouldn't be here
-    constructor(
-        address[] memory _agentsOtherThanSender,
-        address[] memory _supportedTokens,
-        uint16[] memory _tokenAnnualRates
-    ) {
+    constructor(address[] memory _agentsOtherThanSender) {
         isAgent[msg.sender] = true;
         for (uint i = 0; i < _agentsOtherThanSender.length; i++) {
             isAgent[_agentsOtherThanSender[i]] = true;
