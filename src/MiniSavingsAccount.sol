@@ -125,12 +125,16 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     /// @param _token token address to withdraw rewards from
     /// @return totalRewards total amount of rewards that the address got at current timestamp
     function viewTotalRewards(
-        address _token,
+        address _token
     ) external view checkToken(_token) returns (uint totalRewards) {
         BalanceState storage balanceState = userBalanceStates[msg.sender][
             _token
         ];
-        uint rewards = _calculateRewards(_token, balanceState.balance, balanceState.lastBalanceUpdateTimestamp);
+        uint rewards = _calculateRewards(
+            _token,
+            balanceState.balance,
+            balanceState.lastBalanceUpdateTimestamp
+        );
         totalRewards = rewards + balanceState.rewards;
     }
 
