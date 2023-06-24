@@ -17,8 +17,8 @@ error ProposalNotPending();
 /// @title MiniSavingsAccountAgent
 /// @author Nika Khachiashvili
 /// @dev The contract contains variables and function for proposing and voting for adding new tokens
-/// @dev Lots of other functions can also be added for voting for example updating the annual interest rate,
-/// @dev adding or revoking the current agents, or even proposing a different tiers with different interest rates for tokens
+/// @dev TODO Lots of other functions can also be added for voting for example updating the annual interest rate,
+/// @dev TODO adding or revoking the current agents, or even proposing a different tiers with different interest rates for tokens
 contract MiniSavingsAccountAgent {
     event NewTokenProposed(uint proposalId);
     event NewTokenProposalVoted(

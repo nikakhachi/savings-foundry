@@ -7,7 +7,7 @@ import "./MiniSavingsAccountAgent.sol";
 /// @author Nika Khachiashvili
 /// @dev The contract is the main contract that will be deployed and contains the external functions for everyone
 /// @dev For depositing, withdrawing and getting the rewards
-/// @dev Possible feature additions are mentioned in the comments of deposit() and earnRewards()
+/// @dev TODO Possible feature additions are mentioned in the comments of deposit() and earnRewards()
 contract MiniSavingsAccount is MiniSavingsAccountAgent {
     event Deposit(address indexed depositor, address token, uint amount);
     event LowBalanceAlert(address indexed token, uint balance, uint timestamp);
@@ -54,6 +54,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     /// @dev interest % is only given on the deposited amount and not on the rewards, meaning
     /// @dev if address initially deposits 100 token and earns 2 tokens and has total 102 withdrawable
     /// @dev tokens, interest earned are still based on the deposited 100 tokens.
+    /// @dev TODO Will be interested to also implement earning of interest based on rewards
     /// @param _token token address to deposit
     /// @param _amount amount to deposit
     function deposit(address _token, uint _amount) external checkToken(_token) {
@@ -99,9 +100,9 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     }
 
     /// @notice withdraw only the rewards from the contract
-    /// @dev This function can be merged with the withdraw() function, and when the user withdraw soem
-    /// @dev specific amount, first we can drain the rewards, and after its 0, than we can drain their
-    /// @dev deposited amount to ensure that they can the maximum interest %
+    /// @dev TODO This function can be merged with the withdraw() function, and when the user withdraw some
+    /// @dev TODO specific amount, first we can drain the rewards, and after its 0, than we can drain their
+    /// @dev TODO deposited amount to ensure that they can get the maximum interest %,
     /// @dev because interest isn't given on reward amount (explained in comments of deposit())
     /// @param _token token address to withdraw rewards from
     /// @param _amount amount to withdraw rewards from
