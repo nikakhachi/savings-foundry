@@ -187,8 +187,8 @@ contract MiniSavingsAccountAgent {
     /// @dev Calculates the votes needed for the proposal to pass based on
     /// @dev current agent count. The number will always be more than half
     /// @dev of the current agents count
-    function _calculateVotesNeededToPass() private view returns (uint) {
-        return
-            agentsCount % 2 == 0 ? agentsCount / 2 + 1 : (agentsCount + 1) / 2;
+    /// @return n vote number needed for the proposal to pass
+    function _calculateVotesNeededToPass() private view returns (uint n) {
+        n = agentsCount % 2 == 0 ? agentsCount / 2 + 1 : (agentsCount + 1) / 2;
     }
 }

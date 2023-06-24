@@ -124,6 +124,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     /// @param _token token address
     /// @param _balance address' balance for that token
     /// @param _lastBalanceUpdateTimestamp timestamp of last updated balance
+    /// @return earnedRewards final calculated rewards earned
     function _calculateRewards(
         address _token,
         uint _balance,
