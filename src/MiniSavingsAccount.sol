@@ -119,6 +119,21 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
             emit LowBalanceAlert(_token, balance, block.timestamp);
     }
 
+    /// @notice View total amount of rewards that the address has at the current timestamp
+    /// @dev `rewards` property in balanceState is only updated on stake() or withdraw() so it doesn't show full
+    /// @dev amount of rewards, so this function calculates the full rewards and returns it.
+    /// @param _token token address to withdraw rewards from
+    /// @return totalRewards total amount of rewards that the address got at current timestamp
+    function viewTotalRewards(
+        address _token,
+    ) external view checkToken(_token) returns (uint totalRewards) {
+        BalanceState storage balanceState = userBalanceStates[msg.sender][
+            _token
+        ];
+        uint rewards = _calculateRewards(_token, balanceState.balance, balanceState.lastBalanceUpdateTimestamp);
+        totalRewards = rewards + balanceState.rewards;
+    }
+
     /// @notice get all the supported tokens with their interest rates
     /// @dev pagination is included in function because of the array is huge,
     /// @dev we want to avoid iterating and returning this huge list
