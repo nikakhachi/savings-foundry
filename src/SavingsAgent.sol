@@ -101,6 +101,10 @@ contract SavingsAgent is AccessControlEnumerable {
     mapping(address => address) public delegates;
 
     /// @dev Proposing the addition of a new token
+    /// @dev This function does check if the token is already supported or not, but it doesn't check if there's an
+    /// @dev ongoing proposal for the token, because that we would need to iterate through an array and spend more gas,
+    /// @dev instead, it allows the proposal but it won't allow execution of double token proposals.
+    /// @dev More in comments of executeNewTokenProposal()
     /// @param _token token address that is proposed
     /// @param _annualRate annual interest rate of the proposed token. FORMAT  350 = 3.50%
     function proposeNewToken(
@@ -169,6 +173,14 @@ contract SavingsAgent is AccessControlEnumerable {
     /// @param id proposal id
     function executeNewTokenProposal(uint id) external {
         NewTokenProposal storage proposal = newTokenProposals[id];
+
+        /// @dev We're doing this check here to avoid executing a new token proposal while the new token is
+        /// @dev already supported. While doing a proposal, the code checks if the token supported or not,
+        /// @dev but it doesn't check whether there is already an ongoing proposal for that token (because of gas savings,
+        /// @dev please see the comment on proposeNewToken() for more details), so it's
+        /// @dev possible from this function that double supported tokens appear, but this check prevents it.
+        if (tokenAnnualRates[proposal.token] != 0) revert InvalidToken();
+
         if (proposal.voteEndsAt == 0) revert ProposalNotFound();
         if (proposal.voteEndsAt >= block.timestamp) revert VotingInProgress();
         if (proposal.status != ProposalStatus.PENDING)
