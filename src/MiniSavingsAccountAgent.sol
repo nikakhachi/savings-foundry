@@ -33,6 +33,21 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
 
     bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE"); /// @dev Role identifier for agents. Agents can vote for proposals
 
+    /// @dev Contract constructor.
+    /// @dev We can also implement setting of the initial tokens and their rates here
+    /// @param _agentsOtherThanSender list of addresses (agents) that will be able to vote, MSG.SENDER shouldn't be here
+    constructor(address[] memory _agentsOtherThanSender) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        grantRole(AGENT_ROLE, msg.sender);
+        for (uint i = 0; i < _agentsOtherThanSender.length; i++) {
+            grantRole(AGENT_ROLE, _agentsOtherThanSender[i]);
+        }
+        /// @dev The contract was also tracking the number of AGENT_ROLE members locally,
+        /// @dev but now AccessControlEnumerable.sol extension of @openzeppelin does it for us.
+        /// @dev but if we had to track it locally, I would set the count once, like agentsCount = _agentsOtherThanSender.length,
+        /// @dev instead of incrementing it in loop, because mutating the state only once cost less gas.
+    }
+
     /// @dev Vote Status of the agent in reference to the specific proposal
     enum Vote {
         NO_VOTE,

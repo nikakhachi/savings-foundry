@@ -41,20 +41,12 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     uint public immutable totalClaimedRewardsCheckpoint = 10 * 10 ** 18;
     uint8 public constant premiumTierInterestPercentage = 120; /// @dev 120%
 
-    /// @dev Contract constructor.
+    /// @dev Contract constructor calling it's parent's constructor
     /// @dev We can also implement setting of the initial tokens and their rates here
     /// @param _agentsOtherThanSender list of addresses (agents) that will be able to vote, MSG.SENDER shouldn't be here
-    constructor(address[] memory _agentsOtherThanSender) {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        grantRole(AGENT_ROLE, msg.sender);
-        for (uint i = 0; i < _agentsOtherThanSender.length; i++) {
-            grantRole(AGENT_ROLE, _agentsOtherThanSender[i]);
-        }
-        /// @dev The contract was also tracking the number of AGENT_ROLE members locally,
-        /// @dev but now AccessControlEnumerable.sol extension of @openzeppelin does it for us.
-        /// @dev but if we had to track it locally, I would set the count once, like agentsCount = _agentsOtherThanSender.length,
-        /// @dev instead of incrementing it in loop, because mutating the state only once cost less gas.
-    }
+    constructor(
+        address[] memory _agentsOtherThanSender
+    ) MiniSavingsAccountAgent(_agentsOtherThanSender) {}
 
     /// @dev Modifier that checks if the token is supported by the contract
     modifier checkToken(address _token) {
