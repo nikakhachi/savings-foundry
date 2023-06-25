@@ -14,9 +14,9 @@ contract SavingTest is Test {
     event Withdraw(address indexed depositor, address token, uint amount);
     event ClaimRewards(address indexed depositor, address token, uint amount);
 
-    Savings savings;
-    Token token;
-    Faucet faucet;
+    Savings public savings;
+    Token public token;
+    Faucet public faucet;
 
     uint constant _TOKEN_INITIAL_CONTRACT_SUPPLY = 1000000 * 10 ** 18;
     uint constant _TOKEN_INITIAL_USER_SUPPLY = 400 * 10 ** 18;
@@ -24,7 +24,7 @@ contract SavingTest is Test {
     uint constant _FAUCET_WITHDRAWABLE_AMOUNT = 100 * 10 ** 18;
     uint constant _FAUCET_COOLDOWN = 10;
 
-    uint constant ONE_YEAR = 60 * 60 * 24 * 365;
+    uint constant _ONE_YEAR = 60 * 60 * 24 * 365;
 
     uint16 constant _TOKEN_ANNUAL_RATE = 1000; // FORMAT 1000 = 10%
 
@@ -90,7 +90,7 @@ contract SavingTest is Test {
 
     /// @dev test the rewards calculation on deposit (will be same on withdraw)
     function testRewardCalculation() public {
-        uint depositInterval = ONE_YEAR;
+        uint depositInterval = _ONE_YEAR;
 
         uint depositAmount = _TOKEN_INITIAL_USER_SUPPLY;
         token.approve(address(savings), depositAmount);
@@ -136,7 +136,7 @@ contract SavingTest is Test {
         token.approve(address(savings), depositAmount);
         savings.deposit(address(token), depositAmount);
 
-        uint waitTime = ONE_YEAR;
+        uint waitTime = _ONE_YEAR;
 
         skip(waitTime);
 
@@ -207,7 +207,7 @@ contract SavingTest is Test {
         token.approve(address(savings), depositAmount);
         savings.deposit(address(token), depositAmount);
 
-        uint waitTime = ONE_YEAR;
+        uint waitTime = _ONE_YEAR;
 
         skip(waitTime);
 
@@ -239,7 +239,7 @@ contract SavingTest is Test {
         uint depositAmount = _TOKEN_INITIAL_USER_SUPPLY;
         token.approve(address(savings), depositAmount);
         savings.deposit(address(token), depositAmount);
-        skip(ONE_YEAR);
+        skip(_ONE_YEAR);
         savings.withdraw(address(token), depositAmount);
         Savings.BalanceState memory balanceState = savings.getBalanceState(
             address(this),
@@ -256,7 +256,7 @@ contract SavingTest is Test {
         uint depositAmount = _TOKEN_INITIAL_USER_SUPPLY;
         token.approve(address(savings), depositAmount);
         savings.deposit(address(token), depositAmount);
-        skip(ONE_YEAR);
+        skip(_ONE_YEAR);
         savings.withdraw(address(token), depositAmount);
 
         vm.expectRevert();
@@ -283,7 +283,7 @@ contract SavingTest is Test {
         /// @dev make the address premium tier
         uint depositAmountForPremiumTier = (savings
             .CLAIMED_REWARDS_CHECKPOINT() * 10000) / _TOKEN_ANNUAL_RATE;
-        uint depositInterval = ONE_YEAR;
+        uint depositInterval = _ONE_YEAR;
 
         token.approve(address(savings), depositAmountForPremiumTier);
         savings.deposit(address(token), depositAmountForPremiumTier);
