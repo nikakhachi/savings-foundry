@@ -207,6 +207,8 @@ contract SavingsAgent is AccessControlEnumerable {
     }
 
     /// @dev Delegate your vote to another agent
+    /// @dev TODO We can also introduce vote delegations for specific voting actions, for example it will be
+    /// @dev TODO if agent1 can delegate his vote to agent2 but only for new token proposals, and not for any other proposal
     /// @param _delegateTo address that you are delegating to
     function delegateVote(address _delegateTo) external onlyRole(AGENT_ROLE) {
         delegates[msg.sender] = _delegateTo;
@@ -218,6 +220,12 @@ contract SavingsAgent is AccessControlEnumerable {
     /// @dev TODO they first have to revokeDelegate() and then delegateVote() which is more gas consuming
     function revokeDelegate() external onlyRole(AGENT_ROLE) {
         delegates[msg.sender] = address(0);
+    }
+
+    /// @notice Get delegate of the address
+    /// @param _address address of the agent you want to find delegate of
+    function getDelegate(address _address) external view returns (address) {
+        return delegates[_address];
     }
 
     /// @notice Get any new token proposal with id
