@@ -72,7 +72,7 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
         uint against;
         uint inFavor;
         ProposalStatus status;
-        uint16 annualRate;
+        uint16 annualRate; /// @dev uint16 because the format is 350 = 3.50%
     }
 
     /// @dev list and count of all the past and current token proposals
