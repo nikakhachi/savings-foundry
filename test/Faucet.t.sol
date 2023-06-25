@@ -8,9 +8,9 @@ import "../src/Token.sol";
 import "../src/Faucet.sol";
 
 contract FaucetTest is Test {
-    uint constant INITIAL_SUPPLY = 1000 * 10 ** 18;
-    uint constant WITHDRAWABLE_AMOUNT = 10 * 10 ** 18;
-    uint constant COOLDOWN = 10;
+    uint constant _INITIAL_SUPPLY = 1000 * 10 ** 18;
+    uint constant _WITHDRAWABLE_AMOUNT = 10 * 10 ** 18;
+    uint constant _COOLDOWN = 10;
 
     event Withdraw(address indexed user, uint timestamp); /// @dev redeclaring the Faucet's event
 
@@ -18,9 +18,9 @@ contract FaucetTest is Test {
     Faucet public faucet;
 
     function setUp() public {
-        token = new Token("Test Token", "TTK", INITIAL_SUPPLY);
-        faucet = new Faucet(address(token), WITHDRAWABLE_AMOUNT, COOLDOWN);
-        token.transfer(address(faucet), INITIAL_SUPPLY);
+        token = new Token("Test Token", "TTK", _INITIAL_SUPPLY);
+        faucet = new Faucet(address(token), _WITHDRAWABLE_AMOUNT, _COOLDOWN);
+        token.transfer(address(faucet), _INITIAL_SUPPLY);
     }
 
     /// @dev test if the event is fired on withdrawal
@@ -34,17 +34,17 @@ contract FaucetTest is Test {
     function testWithdraw() public {
         assertEq(token.balanceOf(address(this)), 0);
         faucet.withdraw();
-        assertEq(token.balanceOf(address(this)), WITHDRAWABLE_AMOUNT);
+        assertEq(token.balanceOf(address(this)), _WITHDRAWABLE_AMOUNT);
         assertEq(
             token.balanceOf(address(faucet)),
-            INITIAL_SUPPLY - WITHDRAWABLE_AMOUNT
+            _INITIAL_SUPPLY - _WITHDRAWABLE_AMOUNT
         );
     }
 
     /// @dev test the withdrawal function after cooldown is off
     function testWithdrawAfterCooldown() public {
         faucet.withdraw();
-        skip(COOLDOWN);
+        skip(_COOLDOWN);
         faucet.withdraw();
     }
 
@@ -57,9 +57,9 @@ contract FaucetTest is Test {
 
     /// @dev test if it reverts when trying to withdraw funds when contract has insufficient balance
     function testOutOfFunds() public {
-        for (uint i = 0; i < INITIAL_SUPPLY / WITHDRAWABLE_AMOUNT; i++) {
+        for (uint i = 0; i < _INITIAL_SUPPLY / _WITHDRAWABLE_AMOUNT; i++) {
             faucet.withdraw();
-            skip(COOLDOWN);
+            skip(_COOLDOWN);
         }
         vm.expectRevert(Faucet.InsufficientFunds.selector);
         faucet.withdraw();
