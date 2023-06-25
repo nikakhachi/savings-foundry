@@ -183,14 +183,19 @@ contract Savings is SavingsAgent {
         address _token,
         BalanceState memory balanceState
     ) private view returns (uint earnedRewards) {
-        uint duration = block.timestamp -
-            balanceState.lastBalanceUpdateTimestamp;
-        uint rate = balanceState.totalRewardsClaimed >=
-            totalClaimedRewardsCheckpoint
-            ? (tokenAnnualRates[_token] * premiumTierInterestPercentage) / 100
-            : tokenAnnualRates[_token];
-        earnedRewards =
-            ((balanceState.balance * duration * rate) / 10000) /
-            (365 * 24 * 60 * 60); /// @dev calculating % for 1 second
+        if (balanceState.balance == 0) {
+            earnedRewards = 0;
+        } else {
+            uint duration = block.timestamp -
+                balanceState.lastBalanceUpdateTimestamp;
+            uint rate = balanceState.totalRewardsClaimed >=
+                totalClaimedRewardsCheckpoint
+                ? (tokenAnnualRates[_token] * premiumTierInterestPercentage) /
+                    100
+                : tokenAnnualRates[_token];
+            earnedRewards =
+                ((balanceState.balance * duration * rate) / 10000) /
+                (365 * 24 * 60 * 60); /// @dev calculating % for 1 second
+        }
     }
 }
