@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./SavingsAgent.sol";
+import "forge-std/console.sol";
 
 /// @title Savings
 /// @author Nika Khachiashvili
@@ -11,6 +12,8 @@ import "./SavingsAgent.sol";
 /// @dev TODO Possible feature additions are mentioned in the comments of deposit() and earnRewards()
 contract Savings is SavingsAgent {
     event Deposit(address indexed depositor, address token, uint amount);
+    event Withdraw(address indexed depositor, address token, uint amount);
+    event ClaimRewards(address indexed depositor, address token, uint amount);
     event LowBalanceAlert(address indexed token, uint balance, uint timestamp);
 
     /// @dev If the balance hits this number, LowBalanceAlert will be evoked.
@@ -100,6 +103,7 @@ contract Savings is SavingsAgent {
         balanceState.balance -= _amount;
         balanceState.lastBalanceUpdateTimestamp = block.timestamp;
         IERC20(_token).transfer(msg.sender, _amount);
+        emit Withdraw(msg.sender, _token, _amount);
     }
 
     /// @notice withdraw only the rewards from the contract
@@ -121,6 +125,7 @@ contract Savings is SavingsAgent {
         balanceState.totalRewardsClaimed += _amount;
         IERC20(_token).transfer(msg.sender, _amount);
         uint balance = IERC20(_token).balanceOf(address(this));
+        emit ClaimRewards(msg.sender, _token, _amount);
         if (balance <= balanceAlertThreshold)
             emit LowBalanceAlert(_token, balance, block.timestamp);
     }
