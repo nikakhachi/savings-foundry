@@ -204,7 +204,7 @@ contract SavingsAgent is AccessControlEnumerable {
 
     /// @dev Delegate your vote to another agent
     /// @param _delegateTo address that you are delegating to
-    function deletageVote(address _delegateTo) external onlyRole(AGENT_ROLE) {
+    function delegateVote(address _delegateTo) external onlyRole(AGENT_ROLE) {
         delegates[msg.sender] = _delegateTo;
     }
 
