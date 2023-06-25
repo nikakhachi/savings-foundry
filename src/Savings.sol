@@ -162,6 +162,16 @@ contract Savings is SavingsAgent {
         return (addresses, annualInterestRates);
     }
 
+    /// @notice get the specific balance state of the address
+    /// @param _address specific address we want to look up
+    /// @param _token specific token address we want to look up
+    function getBalanceState(
+        address _address,
+        address _token
+    ) external view returns (BalanceState memory) {
+        return userBalanceStates[_address][_token];
+    }
+
     /// @dev Private function for calculating rewards based on the balance, duration and the interest %
     /// @param _token token address
     /// @param balanceState struct of the BalanceState
