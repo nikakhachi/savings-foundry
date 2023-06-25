@@ -276,4 +276,48 @@ contract SavingTest is Test {
         vm.expectRevert();
         savings.claimRewards(address(token), depositAmount);
     }
+
+    /// @dev test address' interest rate on deposit if they are in premium tier
+    function testInterestRateWithPremiumTier() public {
+        /// @dev Reverse engineering the amount address has to deposit to earn rewards that will
+        /// @dev make the address premium tier
+        uint depositAmountForPremiumTier = (savings
+            .totalClaimedRewardsCheckpoint() * 10000) / _TOKEN_ANNUAL_RATE;
+        uint depositInterval = ONE_YEAR;
+
+        token.approve(address(savings), depositAmountForPremiumTier);
+        savings.deposit(address(token), depositAmountForPremiumTier);
+
+        skip(depositInterval);
+
+        savings.withdraw(address(token), depositAmountForPremiumTier);
+
+        Savings.BalanceState memory balanceStateBeforeClaiming = savings
+            .getBalanceState(address(this), address(token));
+
+        savings.claimRewards(
+            address(token),
+            balanceStateBeforeClaiming.rewards
+        );
+
+        uint depositAmountForTestingPremiumTier = 10 * 10 ** 18;
+
+        token.approve(address(savings), depositAmountForTestingPremiumTier);
+        savings.deposit(address(token), depositAmountForTestingPremiumTier);
+
+        skip(depositInterval);
+
+        savings.withdraw(address(token), depositAmountForTestingPremiumTier);
+
+        Savings.BalanceState memory balanceState = savings.getBalanceState(
+            address(this),
+            address(token)
+        );
+
+        uint originalRewards = (depositAmountForTestingPremiumTier *
+            _TOKEN_ANNUAL_RATE) / 10000;
+        uint premiumTierRewards = (originalRewards *
+            savings.premiumTierInterestPercentage()) / 100;
+        assertEq(balanceState.rewards, premiumTierRewards);
+    }
 }
