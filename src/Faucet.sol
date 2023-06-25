@@ -3,15 +3,15 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin/token/ERC20/IERC20.sol";
 
-/// @dev Custom errors
-error InsufficientFunds();
-error InvalidAddress();
-error TooManyRequests();
-
 /// @title Faucet
 /// @author Nika Khachiashvili
 /// @notice A contract that allows users to withdraw ERC20 tokens in a controlled manner.
 contract Faucet {
+    /// @dev Custom errors
+    error InsufficientFunds();
+    error InvalidAddress();
+    error TooManyRequests();
+
     event Withdraw(address indexed user, uint timestamp);
 
     IERC20 public token; /// @dev Reference to the ERC20 token contract.
