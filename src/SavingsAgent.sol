@@ -171,7 +171,8 @@ contract SavingsAgent is AccessControlEnumerable {
 
     /// @dev Executing the new token proposal if the voting time has ended and it the proposal passes
     /// @param id proposal id
-    function executeNewTokenProposal(uint id) external {
+    /// @return passed Whether the proposal has reached the inFavor count for passing, and executed or not
+    function executeNewTokenProposal(uint id) external returns (bool passed) {
         NewTokenProposal storage proposal = newTokenProposals[id];
 
         /// @dev We're doing this check here to avoid executing a new token proposal while the new token is
@@ -194,11 +195,13 @@ contract SavingsAgent is AccessControlEnumerable {
         if (proposal.inFavor < proposal.votesNeededToPass) {
             proposal.status = ProposalStatus.FAILED;
             emit NewTokenProposalFailed(id);
+            passed = false;
         } else {
             tokenAnnualRates[proposal.token] = proposal.annualRate;
             proposal.status = ProposalStatus.EXECUTED;
             supportedTokens.push(proposal.token);
             emit NewTokenProposalExecuted(id);
+            passed = true;
         }
     }
 
