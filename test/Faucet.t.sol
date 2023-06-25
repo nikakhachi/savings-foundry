@@ -23,12 +23,14 @@ contract FaucetTest is Test {
         token.transfer(address(faucet), INITIAL_SUPPLY);
     }
 
+    /// @dev test if the event is fired on withdrawal
     function testEvent() public {
         vm.expectEmit(true, false, true, true);
         emit Withdraw(address(this), block.timestamp);
         faucet.withdraw();
     }
 
+    /// @dev test the withdrawal function
     function testWithdraw() public {
         assertEq(token.balanceOf(address(this)), 0);
         faucet.withdraw();
@@ -39,18 +41,21 @@ contract FaucetTest is Test {
         );
     }
 
+    /// @dev test the withdrawal function after cooldown is off
     function testWithdrawAfterCooldown() public {
         faucet.withdraw();
         skip(COOLDOWN);
         faucet.withdraw();
     }
 
+    /// @dev test if it reverts if trying to withdraw twice within the cooldown
     function testCooldown() public {
         faucet.withdraw();
         vm.expectRevert(Faucet.TooManyRequests.selector);
         faucet.withdraw();
     }
 
+    /// @dev test if it reverts when trying to withdraw funds when contract has insufficient balance
     function testOutOfFunds() public {
         for (uint i = 0; i < INITIAL_SUPPLY / WITHDRAWABLE_AMOUNT; i++) {
             faucet.withdraw();
