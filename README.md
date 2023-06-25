@@ -2,6 +2,8 @@
 
 decentralized finance (DeFi) platform built on the Ethereum blockchain, offering users the opportunity to deposit supported tokens and earn competitive annual interest rates. As users accumulate rewards, they have the chance to ascend to the premium tier, unlocking an additional 20% interest boost on their deposits. The platform operates on a voting system, where platform agents can propose and add new tokens, ensuring a diverse range of options for users. Experience the power of decentralized savings with Mini Savings Account.
 
+The project is ongoing and there are lots of things that can be implemented. Some possible features and implementations are mentioned in the code that describes the behaviors and the supposed implementation, so feel free to contribute!
+
 ## Table of Contents
 
 - [Features](#features)
