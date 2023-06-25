@@ -195,14 +195,18 @@ contract Savings is SavingsAgent {
         } else {
             uint duration = block.timestamp -
                 balanceState.lastBalanceUpdateTimestamp;
-            uint rate = balanceState.totalRewardsClaimed >=
-                totalClaimedRewardsCheckpoint
-                ? (tokenAnnualRates[_token] * premiumTierInterestPercentage) /
-                    100
-                : tokenAnnualRates[_token];
             earnedRewards =
-                ((balanceState.balance * duration * rate) / 10000) /
+                ((balanceState.balance * duration * tokenAnnualRates[_token]) /
+                    10000) /
                 (365 * 24 * 60 * 60); /// @dev calculating % for 1 second
+            if (
+                balanceState.totalRewardsClaimed >=
+                totalClaimedRewardsCheckpoint
+            ) {
+                earnedRewards =
+                    (earnedRewards * premiumTierInterestPercentage) /
+                    100;
+            }
         }
     }
 }
