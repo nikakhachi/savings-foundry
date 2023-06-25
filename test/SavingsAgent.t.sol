@@ -410,6 +410,27 @@ contract SavingsAgentTest is Test {
         savingsAgent.executeNewTokenProposal(proposal2Id);
     }
 
+    /// @dev Delegations
+
+    /// @dev test delegate vote
+    function testDelegateVote() public {
+        vm.prank(AGENT_1);
+        savingsAgent.delegateVote(AGENT_2);
+
+        assertEq(savingsAgent.getDelegate(AGENT_1), AGENT_2);
+    }
+
+    /// @dev test revoke delegate
+    function testRevokeDelegate() public {
+        vm.prank(AGENT_1);
+        savingsAgent.delegateVote(AGENT_2);
+
+        vm.prank(AGENT_1);
+        savingsAgent.revokeDelegate();
+
+        assertEq(savingsAgent.getDelegate(AGENT_1), address(0));
+    }
+
     /// @dev Helper functions
 
     function _enumToHash(
