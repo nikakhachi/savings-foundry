@@ -182,7 +182,7 @@ contract SavingsAgent is AccessControlEnumerable {
         if (tokenAnnualRates[proposal.token] != 0) revert InvalidToken();
 
         if (proposal.voteEndsAt == 0) revert ProposalNotFound();
-        if (proposal.voteEndsAt >= block.timestamp) revert VotingInProgress();
+        if (proposal.voteEndsAt > block.timestamp) revert VotingInProgress();
         if (proposal.status != ProposalStatus.PENDING)
             revert ProposalNotPending();
         if (
