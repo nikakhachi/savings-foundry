@@ -94,6 +94,7 @@ contract Savings is SavingsAgent {
         address _token,
         uint _amount
     ) external checkToken(_token) {
+        require(_amount > 0);
         BalanceState storage balanceState = userBalanceStates[msg.sender][
             _token
         ];
@@ -117,6 +118,7 @@ contract Savings is SavingsAgent {
         address _token,
         uint _amount
     ) external checkToken(_token) {
+        require(_amount > 0);
         BalanceState storage balanceState = userBalanceStates[msg.sender][
             _token
         ];
