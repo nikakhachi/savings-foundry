@@ -216,6 +216,14 @@ contract SavingsAgent is AccessControlEnumerable {
         delegates[msg.sender] = address(0);
     }
 
+    /// @notice Get any new token proposal with id
+    /// @param id the id of the proposal
+    function getNewTokenProposalById(
+        uint id
+    ) external view returns (NewTokenProposal memory) {
+        return newTokenProposals[id];
+    }
+
     /// @dev Calculates the votes needed for the proposal to pass based on
     /// @dev current agent count. The number will always be more than half
     /// @dev of the current agents count
