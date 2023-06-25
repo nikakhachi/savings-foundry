@@ -28,29 +28,29 @@ contract SavingsAgentTest is Test {
     Token token2;
     Token token3;
 
-    uint constant TOKEN1_INITIAL_SUPPLY = 1000000 * 10 ** 18;
-    uint constant TOKEN2_INITIAL_SUPPLY = 1000000 * 10 ** 18;
-    uint constant TOKEN3_INITIAL_SUPPLY = 10 * 10 ** 18;
+    uint constant _TOKEN1_INITIAL_SUPPLY = 1000000 * 10 ** 18;
+    uint constant _TOKEN2_INITIAL_SUPPLY = 1000000 * 10 ** 18;
+    uint constant _TOKEN3_INITIAL_SUPPLY = 10 * 10 ** 18;
 
-    address constant AGENT_1 = address(1);
-    address constant AGENT_2 = address(2);
-    address constant NON_AGENT = address(3);
+    address constant _AGENT_1 = address(1);
+    address constant _AGENT_2 = address(2);
+    address constant _NON_AGENT = address(3);
 
-    address[] INITIAL_AGENTS = [AGENT_1, AGENT_2];
+    address[] _initialAgents = [_AGENT_1, _AGENT_2];
 
-    uint requiredTokenBalanceUponAdding;
-    uint newTokenProposalDuration;
+    uint _requiredTokenBalanceUponAdding;
+    uint _newTokenProposalDuration;
 
     function setUp() public {
-        token1 = new Token("Test Token 1", "TTT", TOKEN1_INITIAL_SUPPLY);
-        token2 = new Token("Test Token 2", "TTK", TOKEN2_INITIAL_SUPPLY);
-        token3 = new Token("Test Token 2", "TTK", TOKEN3_INITIAL_SUPPLY);
-        savingsAgent = new SavingsAgent(INITIAL_AGENTS);
-        requiredTokenBalanceUponAdding = savingsAgent
+        token1 = new Token("Test Token 1", "TTT", _TOKEN1_INITIAL_SUPPLY);
+        token2 = new Token("Test Token 2", "TTK", _TOKEN2_INITIAL_SUPPLY);
+        token3 = new Token("Test Token 2", "TTK", _TOKEN3_INITIAL_SUPPLY);
+        savingsAgent = new SavingsAgent(_initialAgents);
+        _requiredTokenBalanceUponAdding = savingsAgent
             .requiredTokenBalanceUponAdding();
-        newTokenProposalDuration = savingsAgent.newTokenProposalDuration();
-        token1.transfer(address(savingsAgent), TOKEN1_INITIAL_SUPPLY);
-        token2.transfer(address(savingsAgent), TOKEN2_INITIAL_SUPPLY);
+        _newTokenProposalDuration = savingsAgent.newTokenProposalDuration();
+        token1.transfer(address(savingsAgent), _TOKEN1_INITIAL_SUPPLY);
+        token2.transfer(address(savingsAgent), _TOKEN2_INITIAL_SUPPLY);
     }
 
     /// @dev Proposing New Token
@@ -69,7 +69,7 @@ contract SavingsAgentTest is Test {
         assertEq(proposal.token, address(token1));
         assertEq(
             proposal.voteEndsAt,
-            block.timestamp + newTokenProposalDuration
+            block.timestamp + _newTokenProposalDuration
         );
         assertEq(proposal.votesNeededToPass, _calculateVotesNeededToPass());
         assertEq(proposal.against, 0);
@@ -105,7 +105,7 @@ contract SavingsAgentTest is Test {
 
     /// @dev test if it reverts when non-agent tries to propose new token
     function testNonAgentShouldNotProposeNewToken() public {
-        vm.prank(NON_AGENT);
+        vm.prank(_NON_AGENT);
         vm.expectRevert();
         savingsAgent.proposeNewToken(address(token1), 200);
     }
@@ -114,11 +114,11 @@ contract SavingsAgentTest is Test {
     function testShouldNotProposeExistingToken() public {
         uint proposalId = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposalId, true);
-        vm.prank(AGENT_2);
-        savingsAgent.voteNewToken(AGENT_2, proposalId, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposalId, true);
+        vm.prank(_AGENT_2);
+        savingsAgent.voteNewToken(_AGENT_2, proposalId, true);
+        skip(_newTokenProposalDuration);
         savingsAgent.executeNewTokenProposal(proposalId);
         vm.expectRevert(SavingsAgent.InvalidToken.selector);
         savingsAgent.proposeNewToken(address(token1), 200);
@@ -142,22 +142,22 @@ contract SavingsAgentTest is Test {
             .getNewTokenProposalById(proposalId);
 
         /// @dev First voting and checking statuses
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposalId, false);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposalId, false);
         SavingsAgent.NewTokenProposal
             memory proposalAfterFirstVote = savingsAgent
                 .getNewTokenProposalById(proposalId);
         assertEq(initialProposal.against + 1, proposalAfterFirstVote.against);
         assertEq(
-            _enumToHash(savingsAgent.agentVotes(AGENT_1, proposalId)),
+            _enumToHash(savingsAgent.agentVotes(_AGENT_1, proposalId)),
             _enumToHash(SavingsAgent.Vote.AGAINST)
         );
 
         /// @dev Second voting and checking statuses
         /// @dev designed to make the proposal fail because failing triggers additional code
         /// @dev in a fuction and passing doesn't
-        vm.prank(AGENT_2);
-        savingsAgent.voteNewToken(AGENT_2, proposalId, false);
+        vm.prank(_AGENT_2);
+        savingsAgent.voteNewToken(_AGENT_2, proposalId, false);
         SavingsAgent.NewTokenProposal
             memory proposalAfterSecondVote = savingsAgent
                 .getNewTokenProposalById(proposalId);
@@ -170,7 +170,7 @@ contract SavingsAgentTest is Test {
             proposalAfterFirstVote.inFavor
         );
         assertEq(
-            _enumToHash(savingsAgent.agentVotes(AGENT_2, proposalId)),
+            _enumToHash(savingsAgent.agentVotes(_AGENT_2, proposalId)),
             _enumToHash(SavingsAgent.Vote.AGAINST)
         );
 
@@ -188,18 +188,18 @@ contract SavingsAgentTest is Test {
 
         savingsAgent.proposeNewToken(address(token1), 200);
 
-        vm.prank(AGENT_2);
-        savingsAgent.delegateVote(AGENT_1);
+        vm.prank(_AGENT_2);
+        savingsAgent.delegateVote(_AGENT_1);
 
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_2, proposalId, true);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_2, proposalId, true);
 
         assertEq(
-            _enumToHash(savingsAgent.agentVotes(AGENT_2, proposalId)),
+            _enumToHash(savingsAgent.agentVotes(_AGENT_2, proposalId)),
             _enumToHash(SavingsAgent.Vote.IN_FAVOR)
         );
         assertEq(
-            _enumToHash(savingsAgent.agentVotes(AGENT_1, proposalId)),
+            _enumToHash(savingsAgent.agentVotes(_AGENT_1, proposalId)),
             _enumToHash(SavingsAgent.Vote.NO_VOTE)
         );
     }
@@ -209,10 +209,10 @@ contract SavingsAgentTest is Test {
         uint proposalId = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
 
-        vm.prank(AGENT_1);
+        vm.prank(_AGENT_1);
         vm.expectEmit(true, false, false, true);
-        emit NewTokenProposalVoted(AGENT_1, AGENT_1, proposalId, true);
-        savingsAgent.voteNewToken(AGENT_1, proposalId, true);
+        emit NewTokenProposalVoted(_AGENT_1, _AGENT_1, proposalId, true);
+        savingsAgent.voteNewToken(_AGENT_1, proposalId, true);
     }
 
     /// @dev Checks if the event will be triggered when the automatical failure will happen
@@ -221,24 +221,24 @@ contract SavingsAgentTest is Test {
         uint proposalId = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
 
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposalId, false);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposalId, false);
 
-        vm.prank(AGENT_2);
+        vm.prank(_AGENT_2);
         vm.expectEmit(false, false, false, true);
         emit NewTokenProposalFailed(proposalId);
-        savingsAgent.voteNewToken(AGENT_2, proposalId, false);
+        savingsAgent.voteNewToken(_AGENT_2, proposalId, false);
     }
 
     /// @dev test if it reverts if agent tries to vote twice
     function testShouldNotDoubleVoteNewTokenProposal() public {
         uint id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, false);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, false);
         vm.expectRevert(SavingsAgent.AlreadyVoted.selector);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, false);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, false);
     }
 
     /// @dev test if it reverts if agent tries to vote with invalid id
@@ -246,27 +246,27 @@ contract SavingsAgentTest is Test {
         uint id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
         vm.expectRevert(SavingsAgent.ProposalNotFound.selector);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id + 1, false);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id + 1, false);
     }
 
     /// @dev test if it reverts if agent tries to vote proposal with ended voting time
     function testShouldNotVoteEndedNewTokenProposal() public {
         uint id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        skip(newTokenProposalDuration);
+        skip(_newTokenProposalDuration);
         vm.expectRevert(SavingsAgent.VotingEnded.selector);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, false);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, false);
     }
 
     /// @dev test if it reverts if agent tries to vote with invalid delegate
     function testShouldNotVoteNewTokenProposalWithInvalidDelegate() public {
         uint id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
+        vm.prank(_AGENT_1);
         vm.expectRevert(SavingsAgent.InvalidDelegate.selector);
-        savingsAgent.voteNewToken(AGENT_2, id, false);
+        savingsAgent.voteNewToken(_AGENT_2, id, false);
     }
 
     /// @dev Executing New Token Proposals
@@ -276,9 +276,9 @@ contract SavingsAgentTest is Test {
         uint id = savingsAgent.newTokenProposalsCount();
         uint16 annualRate = 200;
         savingsAgent.proposeNewToken(address(token1), annualRate);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, true);
+        skip(_newTokenProposalDuration);
 
         bool passed = savingsAgent.executeNewTokenProposal(id);
         assertTrue(passed);
@@ -297,9 +297,9 @@ contract SavingsAgentTest is Test {
     function testExecutePassingNewTokenProposalEvent() public {
         uint id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, true);
+        skip(_newTokenProposalDuration);
 
         vm.expectEmit(false, false, false, true);
         emit NewTokenProposalExecuted(id);
@@ -311,9 +311,9 @@ contract SavingsAgentTest is Test {
         uint id = savingsAgent.newTokenProposalsCount();
         uint16 annualRate = 200;
         savingsAgent.proposeNewToken(address(token1), annualRate);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, false);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, false);
+        skip(_newTokenProposalDuration);
 
         bool passed = savingsAgent.executeNewTokenProposal(id);
         assertFalse(passed);
@@ -331,9 +331,9 @@ contract SavingsAgentTest is Test {
     function testExecuteFailingNewTokenProposalEvent() public {
         uint id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, id, false);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, id, false);
+        skip(_newTokenProposalDuration);
 
         vm.expectEmit(false, false, false, true);
         emit NewTokenProposalFailed(id);
@@ -358,9 +358,9 @@ contract SavingsAgentTest is Test {
     function testExecutingExecutedNewTokenProposal() public {
         uint proposalId = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposalId, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposalId, true);
+        skip(_newTokenProposalDuration);
 
         savingsAgent.executeNewTokenProposal(proposalId);
 
@@ -372,18 +372,18 @@ contract SavingsAgentTest is Test {
     function testExecutingNewTokenProposalWithInsufficientBalance() public {
         uint proposalId = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposalId, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposalId, true);
+        skip(_newTokenProposalDuration);
 
         vm.prank(address(savingsAgent));
-        token1.approve(NON_AGENT, TOKEN1_INITIAL_SUPPLY);
+        token1.approve(_NON_AGENT, _TOKEN1_INITIAL_SUPPLY);
 
-        vm.prank(NON_AGENT);
+        vm.prank(_NON_AGENT);
         token1.transferFrom(
             address(savingsAgent),
-            NON_AGENT,
-            TOKEN1_INITIAL_SUPPLY
+            _NON_AGENT,
+            _TOKEN1_INITIAL_SUPPLY
         );
 
         vm.expectRevert(SavingsAgent.InsufficientBalance.selector);
@@ -394,15 +394,15 @@ contract SavingsAgentTest is Test {
     function testExecutingNewTokenProposalWithInvalidToken() public {
         uint proposal1Id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposal1Id, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposal1Id, true);
+        skip(_newTokenProposalDuration);
 
         uint proposal2Id = savingsAgent.newTokenProposalsCount();
         savingsAgent.proposeNewToken(address(token1), 200);
-        vm.prank(AGENT_1);
-        savingsAgent.voteNewToken(AGENT_1, proposal2Id, true);
-        skip(newTokenProposalDuration);
+        vm.prank(_AGENT_1);
+        savingsAgent.voteNewToken(_AGENT_1, proposal2Id, true);
+        skip(_newTokenProposalDuration);
 
         savingsAgent.executeNewTokenProposal(proposal1Id);
 
@@ -414,21 +414,21 @@ contract SavingsAgentTest is Test {
 
     /// @dev test delegate vote
     function testDelegateVote() public {
-        vm.prank(AGENT_1);
-        savingsAgent.delegateVote(AGENT_2);
+        vm.prank(_AGENT_1);
+        savingsAgent.delegateVote(_AGENT_2);
 
-        assertEq(savingsAgent.getDelegate(AGENT_1), AGENT_2);
+        assertEq(savingsAgent.getDelegate(_AGENT_1), _AGENT_2);
     }
 
     /// @dev test revoke delegate
     function testRevokeDelegate() public {
-        vm.prank(AGENT_1);
-        savingsAgent.delegateVote(AGENT_2);
+        vm.prank(_AGENT_1);
+        savingsAgent.delegateVote(_AGENT_2);
 
-        vm.prank(AGENT_1);
+        vm.prank(_AGENT_1);
         savingsAgent.revokeDelegate();
 
-        assertEq(savingsAgent.getDelegate(AGENT_1), address(0));
+        assertEq(savingsAgent.getDelegate(_AGENT_1), address(0));
     }
 
     /// @dev Helper functions
@@ -446,7 +446,7 @@ contract SavingsAgentTest is Test {
     }
 
     function _calculateVotesNeededToPass() private view returns (uint n) {
-        uint agentsCount = INITIAL_AGENTS.length + 1;
+        uint agentsCount = _initialAgents.length + 1;
         n = agentsCount % 2 == 0 ? agentsCount / 2 + 1 : (agentsCount + 1) / 2;
     }
 }
