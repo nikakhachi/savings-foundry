@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "./MiniSavingsAccountAgent.sol";
+import "./SavingsAgent.sol";
 
-/// @title MiniSavingsAccount
+/// @title Savings
 /// @author Nika Khachiashvili
 /// @dev The contract is the main contract that will be deployed and contains the external functions for everyone
-/// @dev For depositing, withdrawing and getting the rewards. It also inherits MiniSavingsAccountAgent that has supported
+/// @dev For depositing, withdrawing and getting the rewards. It also inherits SavingsAgent that has supported
 /// @dev tokens data and the voting system implemented.
 /// @dev TODO Possible feature additions are mentioned in the comments of deposit() and earnRewards()
-contract MiniSavingsAccount is MiniSavingsAccountAgent {
+contract Savings is SavingsAgent {
     event Deposit(address indexed depositor, address token, uint amount);
     event LowBalanceAlert(address indexed token, uint balance, uint timestamp);
 
@@ -46,7 +46,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     /// @param _agentsOtherThanSender list of addresses (agents) that will be able to vote, MSG.SENDER shouldn't be here
     constructor(
         address[] memory _agentsOtherThanSender
-    ) MiniSavingsAccountAgent(_agentsOtherThanSender) {}
+    ) SavingsAgent(_agentsOtherThanSender) {}
 
     /// @dev Modifier that checks if the token is supported by the contract
     modifier checkToken(address _token) {
