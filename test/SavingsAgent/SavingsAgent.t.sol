@@ -7,10 +7,8 @@ import "forge-std/console.sol";
 import "../../src/SavingsAgent.sol";
 import "../../src/Token.sol";
 
-/// @dev This contract has function with long names, such as `testNonAgentShouldNotProposeNewToken`
-/// @dev I could've written just `testNonAgentShouldNotPropose` but I'm still specifying the proposal everywhere
-/// @dev because if it was a real project, most likely (or maybe) we would've added now proposals and voting
-/// @dev systems for other features, and that's why I'm specifying them
+/// @dev This contract is a parent test contract for SavingsAgent contract
+/// @dev Contains all the variables and the setUp() script
 contract SavingsAgentTest is Test {
     /// @dev redeclaring the SavingsAgent's events
     event NewTokenProposed(uint proposalId);
@@ -54,6 +52,7 @@ contract SavingsAgentTest is Test {
     }
 }
 
+/// @dev Helper library containg helper functions
 library Helpers {
     function enumToHash(
         SavingsAgent.Vote vote

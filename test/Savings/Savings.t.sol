@@ -8,6 +8,8 @@ import "../../src/Savings.sol";
 import "../../src/Token.sol";
 import "../../src/Faucet.sol";
 
+/// @dev This contract is a parent test contract for Savings contract
+/// @dev Contains all the variables and the setUp() script
 contract SavingsTest is Test {
     event Deposit(address indexed depositor, address token, uint amount);
     event LowBalanceAlert(address indexed token, uint balance, uint timestamp);

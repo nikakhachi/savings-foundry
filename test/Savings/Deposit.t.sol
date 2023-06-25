@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./Savings.t.sol";
 
+/// @dev This contract contains test cases specific to the deposit() function of Savings contract
 contract DepositTest is SavingsTest {
     /// @dev test user's deposit and if states are updated correctly
     function testDeposit() public {

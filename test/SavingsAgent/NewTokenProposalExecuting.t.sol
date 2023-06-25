@@ -3,10 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./SavingsAgent.t.sol";
 
-/// @dev This contract has function with long names, such as `testNonAgentShouldNotProposeNewToken`
-/// @dev I could've written just `testNonAgentShouldNotPropose` but I'm still specifying the proposal everywhere
-/// @dev because if it was a real project, most likely (or maybe) we would've added now proposals and voting
-/// @dev systems for other features, and that's why I'm specifying them
+/// @dev This contract contains test cases specific to the execution of new token proposals of SavingsAgent contract
 contract NewTokenProposalExecutingTest is SavingsAgentTest {
     /// @dev test the execution of the new token proposal with enough inFavor votes
     function testExecutePassingNewTokenProposal() public {

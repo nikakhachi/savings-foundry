@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./Savings.t.sol";
 
+/// @dev This contract contains test cases specific to the claimRewards() function of Savings contract
 contract ClaimRewardsTest is SavingsTest {
     function testClaimRewards() public {
         uint depositAmount = _TOKEN_INITIAL_USER_SUPPLY;
