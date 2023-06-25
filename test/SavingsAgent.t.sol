@@ -23,10 +23,10 @@ contract SavingsAgentTest is Test {
     event NewTokenProposalFailed(uint proposalId);
     event NewTokenProposalExecuted(uint proposalId);
 
-    SavingsAgent savingsAgent;
-    Token token1;
-    Token token2;
-    Token token3;
+    SavingsAgent public savingsAgent;
+    Token public token1;
+    Token public token2;
+    Token public token3;
 
     uint constant _TOKEN1_INITIAL_SUPPLY = 1000000 * 10 ** 18;
     uint constant _TOKEN2_INITIAL_SUPPLY = 1000000 * 10 ** 18;
