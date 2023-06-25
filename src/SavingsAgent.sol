@@ -227,6 +227,12 @@ contract SavingsAgent is AccessControlEnumerable {
         return newTokenProposals[id];
     }
 
+    /// @notice Get the annual rate of the tokn
+    /// @param _token interested token
+    function getTokenAnnualRate(address _token) external view returns (uint16) {
+        return tokenAnnualRates[_token];
+    }
+
     /// @dev Calculates the votes needed for the proposal to pass based on
     /// @dev current agent count. The number will always be more than half
     /// @dev of the current agents count
