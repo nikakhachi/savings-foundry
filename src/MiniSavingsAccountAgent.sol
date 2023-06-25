@@ -31,7 +31,7 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
     event NewTokenProposalFailed(uint proposalId);
     event NewTokenProposalExecuted(uint proposalId);
 
-    bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE"); /// @dev Role identifier for agents
+    bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE"); /// @dev Role identifier for agents. Agents can vote for proposals
 
     /// @dev Vote Status of the agent in reference to the specific proposal
     enum Vote {
@@ -47,15 +47,17 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
         FAILED
     }
 
-    /// @dev When proposing or executing the addition of a new token, it will be essentioal for contract
-    /// @dev to have this minimum balance of the token to ensure safe giving of the interest
+    /// @dev When proposing or executing the addition of a new token, it will be essential for the contract
+    /// @dev to have this minimum balance of the token, to ensure a safe giving of the interest
+    /// @dev TODO Not all tokens have 18 decimals, so good implementation would be to read the decimals number
+    /// @dev TODO from the token data we want to add, and calculate the require balance like that.
     uint public constant requiredTokenBalanceUponAdding = 10000 * 10 ** 18;
 
     /// @dev Interval between proposing new token addition and executing it
-    /// @dev During this interval agents will be able to vote
+    /// @dev During this interval, agents will be able to vote for 'in favor' or 'against' the proposal
     uint public newTokenProposalDuration = 1 weeks;
 
-    /// @dev mapping of tokens with their annual rates. FORMAT  350 = 3.50%
+    /// @dev mapping of tokens with their annual rates. FORMAT 350 = 3.50%
     /// @dev If the annual rate for token is 0 (default), it means that the token isn't supported
     mapping(address => uint16) public tokenAnnualRates;
 
@@ -73,6 +75,7 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
         uint16 annualRate;
     }
 
+    /// @dev list and count of all the past and current token proposals
     mapping(uint => NewTokenProposal) public newTokenProposals;
     uint newTokenProposalsCount;
 
@@ -133,7 +136,7 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
             agentVotes[voter][id] = Vote.AGAINST;
         }
         emit NewTokenProposalVoted(voter, msg.sender, id, isInFavor);
-        /// @dev If all the agents have voted we automatically calculate count of
+        /// @dev If all the agents have voted, we automatically calculate the count of all
         /// @dev inFavor agents and automatically FAIL the proposal if it's less than
         /// @dev the count needed for the proposal to pass
         if (
@@ -146,7 +149,7 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
         }
     }
 
-    /// @dev Executing the new token proposal if the voting time has ended and it passes
+    /// @dev Executing the new token proposal if the voting time has ended and it the proposal passes
     /// @param id proposal id
     function executeNewTokenProposal(uint id) external {
         NewTokenProposal storage proposal = newTokenProposals[id];
@@ -159,7 +162,7 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
             requiredTokenBalanceUponAdding
         ) revert InsufficientBalance();
         /// @dev when the voting period ends, there can be case when not all agents have voted.
-        /// @dev in that case we will decide here if the proposal failed and update the status
+        /// @dev in that case, we will decide here if the proposal failed and update the status
         if (proposal.inFavor < proposal.votesNeededToPass) {
             proposal.status = ProposalStatus.FAILED;
             emit NewTokenProposalFailed(id);
@@ -178,6 +181,9 @@ contract MiniSavingsAccountAgent is AccessControlEnumerable {
     }
 
     /// @dev Revoking your delegation
+    /// @dev TODO We can also implement a function called changeDelegate() which will update the
+    /// @dev TODO delegate address. Because here if the user wants to change their delegate,
+    /// @dev TODO they first have to revokeDelegate() and then delegateVote() which is more gas consuming
     function revokeDelegate() external onlyRole(AGENT_ROLE) {
         delegates[msg.sender] = address(0);
     }
