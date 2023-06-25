@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "openzeppelin/token/ERC20/IERC20.sol";
+import "openzeppelin/access/AccessControlEnumerable.sol";
 
 /// @dev Custom errors
 error InvalidToken();
@@ -19,7 +20,7 @@ error ProposalNotPending();
 /// @dev The contract contains variables and function for proposing and voting for adding new tokens
 /// @dev TODO Lots of other functions can also be added for voting for example updating the annual interest rate,
 /// @dev TODO adding or revoking the current agents, or even proposing a different tiers with different interest rates for tokens
-contract MiniSavingsAccountAgent {
+contract MiniSavingsAccountAgent is AccessControlEnumerable {
     event NewTokenProposed(uint proposalId);
     event NewTokenProposalVoted(
         address indexed voter,
@@ -30,9 +31,7 @@ contract MiniSavingsAccountAgent {
     event NewTokenProposalFailed(uint proposalId);
     event NewTokenProposalExecuted(uint proposalId);
 
-    /// @dev The agent is an address which is able to vote for proposals
-    mapping(address => bool) public isAgent;
-    uint agentsCount;
+    bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE"); /// @dev Role identifier for agents
 
     /// @dev Vote Status of the agent in reference to the specific proposal
     enum Vote {
@@ -83,19 +82,13 @@ contract MiniSavingsAccountAgent {
     /// @dev mapping keeping track of address delegates
     mapping(address => address) public delegates;
 
-    /// @dev Modifierthat ensures only agent who is able to vote can call the function
-    modifier onlyAgent() {
-        if (!isAgent[msg.sender]) revert NonAgent();
-        _;
-    }
-
     /// @dev Proposing the addition of a new token
     /// @param _token token address that is proposed
     /// @param _annualRate annual interest rate of the proposed token. FORMAT  350 = 3.50%
     function proposeNewToken(
         address _token,
         uint16 _annualRate
-    ) external onlyAgent {
+    ) external onlyRole(AGENT_ROLE) {
         if (tokenAnnualRates[_token] != 0) revert InvalidToken();
         if (
             IERC20(_token).balanceOf(address(this)) <
@@ -125,7 +118,7 @@ contract MiniSavingsAccountAgent {
         address voter,
         uint id,
         bool isInFavor
-    ) external onlyAgent {
+    ) external onlyRole(AGENT_ROLE) {
         if (voter != msg.sender && delegates[voter] == msg.sender)
             revert InvalidDelegate();
         if (agentVotes[voter][id] != Vote.NO_VOTE) revert AlreadyVoted();
@@ -144,7 +137,8 @@ contract MiniSavingsAccountAgent {
         /// @dev inFavor agents and automatically FAIL the proposal if it's less than
         /// @dev the count needed for the proposal to pass
         if (
-            proposal.against + proposal.inFavor >= agentsCount &&
+            proposal.against + proposal.inFavor >=
+            getRoleMemberCount(AGENT_ROLE) &&
             proposal.inFavor < proposal.votesNeededToPass
         ) {
             proposal.status = ProposalStatus.FAILED;
@@ -179,12 +173,12 @@ contract MiniSavingsAccountAgent {
 
     /// @dev Delegate your vote to another agent
     /// @param _delegateTo address that you are delegating to
-    function deletageVote(address _delegateTo) external onlyAgent {
+    function deletageVote(address _delegateTo) external onlyRole(AGENT_ROLE) {
         delegates[msg.sender] = _delegateTo;
     }
 
     /// @dev Revoking your delegation
-    function revokeDelegate() external onlyAgent {
+    function revokeDelegate() external onlyRole(AGENT_ROLE) {
         delegates[msg.sender] = address(0);
     }
 
@@ -193,6 +187,7 @@ contract MiniSavingsAccountAgent {
     /// @dev of the current agents count
     /// @return n vote number needed for the proposal to pass
     function _calculateVotesNeededToPass() private view returns (uint n) {
+        uint agentsCount = getRoleMemberCount(AGENT_ROLE);
         n = agentsCount % 2 == 0 ? agentsCount / 2 + 1 : (agentsCount + 1) / 2;
     }
 }
