@@ -62,6 +62,7 @@ contract Savings is SavingsAgent {
     /// @param _token token address to deposit
     /// @param _amount amount to deposit
     function deposit(address _token, uint _amount) external checkToken(_token) {
+        require(_amount > 0);
         IERC20(_token).transferFrom(msg.sender, address(this), _amount);
         BalanceState storage balanceState = userBalanceStates[msg.sender][
             _token
