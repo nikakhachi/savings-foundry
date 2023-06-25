@@ -142,7 +142,7 @@ contract SavingsAgent is AccessControlEnumerable {
         uint id,
         bool isInFavor
     ) external onlyRole(AGENT_ROLE) {
-        if (voter != msg.sender && delegates[voter] == msg.sender)
+        if (voter != msg.sender && delegates[voter] != msg.sender)
             revert InvalidDelegate();
         if (agentVotes[voter][id] != Vote.NO_VOTE) revert AlreadyVoted();
         NewTokenProposal storage proposal = newTokenProposals[id];
