@@ -24,7 +24,7 @@ contract FaucetTest is Test {
     }
 
     function testEvent() public {
-        vm.expectEmit(true, false, true, false);
+        vm.expectEmit(true, false, true, true);
         emit Withdraw(address(this), block.timestamp);
         faucet.withdraw();
     }
