@@ -6,20 +6,20 @@ import "./MiniSavingsAccountAgent.sol";
 /// @title MiniSavingsAccount
 /// @author Nika Khachiashvili
 /// @dev The contract is the main contract that will be deployed and contains the external functions for everyone
-/// @dev For depositing, withdrawing and getting the rewards
+/// @dev For depositing, withdrawing and getting the rewards. It also inherits MiniSavingsAccountAgent that has supported
+/// @dev tokens data and the voting system implemented.
 /// @dev TODO Possible feature additions are mentioned in the comments of deposit() and earnRewards()
 contract MiniSavingsAccount is MiniSavingsAccountAgent {
     event Deposit(address indexed depositor, address token, uint amount);
     event LowBalanceAlert(address indexed token, uint balance, uint timestamp);
 
     /// @dev If the balance hits this number, LowBalanceAlert will be evoked.
-    /// @dev Can be implemented that it's unique for each token and also modifible,
-    /// @dev but let's leave it like that for now.
+    /// @dev TODO Can be implemented that it's unique for each token and also modifible by voting
     uint public constant balanceAlertThreshold = 3000 * 10 ** 18;
 
     struct BalanceState {
         uint balance; /// @dev amount of token that user has deposited and is "saving"
-        /// @dev amount of token that user gets as a reward based on the balance, gets updated when user
+        /// @dev `rewards` ref: amount of token that user gets as a reward based on the balance, gets updated when user
         /// @dev updates the balance property with deposit() or withdraw()
         uint rewards;
         uint lastBalanceUpdateTimestamp; /// @dev timestamp of the last updated balance
@@ -30,16 +30,16 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     mapping(address => mapping(address => BalanceState))
         public userBalanceStates;
 
-    /// @dev if the address collects this amount or more tokens as rewards, they will
-    /// @dev be able to recieve the 120% (premiumTierInterestPercentage) of the original rate
-    /// @dev on that specific token
-    /// @dev TODO This implementation isn't perfect because totalClaimedRewardsCheckpoint only applies
-    /// @dev TODO to the rewards that been claimed and is in `totalRewardsClaimed` property, so if the
-    /// @dev TODO address just  deposits lots of amount of tokens and doesn't touch it for years, even though
-    /// @dev TODO the rewards itself will be huge, it won't be updated in the state because the address
-    /// @dev TODO hasn't called any functions that would trigger the rewards update in state.
+    /// @dev if the address collects this amount or more tokens as rewards, they will be able
+    /// @dev to recieve the 120% (premiumTierInterestPercentage) of the original rate on that specific token
+    /// @dev TODO This implementation isn't perfect, because totalClaimedRewardsCheckpoint only applies
+    /// @dev TODO to the rewards that been claimed and is in `totalRewardsClaimed` property, so if the address just
+    /// @dev TODO deposits lots of amount of tokens and doesn't touch it for years, even though the rewards
+    /// @dev TODO itself will be huge, it won't be updated in the state because the address hasn't called any
+    /// @dev TODO functions that would trigger the rewards update in state. So the address wouldn't unlock Premium Tier.
+    /// @dev TODO Also the decimals differ on different tokens so it's best to be different value for different tokens.
     uint public immutable totalClaimedRewardsCheckpoint = 10 * 10 ** 18;
-    uint8 public constant premiumTierInterestPercentage = 120;
+    uint8 public constant premiumTierInterestPercentage = 120; /// @dev 120%
 
     /// @dev Contract constructor.
     /// @dev We can also implement setting of the initial tokens and their rates here
@@ -56,7 +56,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
         /// @dev instead of incrementing it in loop, because mutating the state only once cost less gas.
     }
 
-    /// @dev Modifier that check if the token is supported
+    /// @dev Modifier that checks if the token is supported by the contract
     modifier checkToken(address _token) {
         require(tokenAnnualRates[_token] > 0);
         _;
@@ -86,6 +86,9 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     }
 
     /// @notice withdraw only your deposited amount from the contract
+    /// @dev If address has deposited 100 tokens and earned 5 tokens, with withdraw() function
+    /// @dev they will be able to only get 100 tokens. 5 reward tokens can be withdrawn from claimRewards()
+    /// @dev TODO These 2 functions can be merged together, see more details in comments below of claimRewards() function
     /// @param _token token address to withdraw
     /// @param _amount amount to withdraw
     function withdraw(
@@ -142,8 +145,7 @@ contract MiniSavingsAccount is MiniSavingsAccountAgent {
     }
 
     /// @notice get all the supported tokens with their interest rates
-    /// @dev pagination is included in function because of the array is huge,
-    /// @dev we want to avoid iterating and returning this huge list
+    /// @dev pagination is included in function because the array is huge, we want to avoid iterating and returning this huge list
     /// @param _page number of page to return
     /// @param _itemsPerPage number of tokens per page
     function getSupportedTokens(
