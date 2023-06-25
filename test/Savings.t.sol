@@ -59,7 +59,7 @@ contract SavingTest is Test {
         savings.proposeNewToken(address(token), _TOKEN_ANNUAL_RATE);
         vm.prank(_AGENT_2);
         savings.voteNewToken(_AGENT_2, proposalId, true);
-        skip(savings.newTokenProposalDuration());
+        skip(savings.NEW_TOKEN_PROPOSAL_DURATION());
         savings.executeNewTokenProposal(proposalId);
     }
 

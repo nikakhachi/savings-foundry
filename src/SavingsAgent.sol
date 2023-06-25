@@ -66,11 +66,11 @@ contract SavingsAgent is AccessControlEnumerable {
     /// @dev to have this minimum balance of the token, to ensure a safe giving of the interest
     /// @dev TODO Not all tokens have 18 decimals, so good implementation would be to read the decimals number
     /// @dev TODO from the token data we want to add, and calculate the require balance like that.
-    uint public constant requiredTokenBalanceUponAdding = 10000 * 10 ** 18;
+    uint public constant REQUIRED_TOKEN_BALANCE_UPON_ADDING = 10000 * 10 ** 18;
 
     /// @dev Interval between proposing new token addition and executing it
     /// @dev During this interval, agents will be able to vote for 'in favor' or 'against' the proposal
-    uint public newTokenProposalDuration = 1 weeks;
+    uint public constant NEW_TOKEN_PROPOSAL_DURATION = 1 weeks;
 
     /// @dev mapping of tokens with their annual rates. FORMAT 350 = 3.50%
     /// @dev If the annual rate for token is 0 (default), it means that the token isn't supported
@@ -114,14 +114,14 @@ contract SavingsAgent is AccessControlEnumerable {
         if (tokenAnnualRates[_token] != 0) revert InvalidToken();
         if (
             IERC20(_token).balanceOf(address(this)) <
-            requiredTokenBalanceUponAdding
+            REQUIRED_TOKEN_BALANCE_UPON_ADDING
         ) revert InsufficientBalance();
 
         uint votesNeededToPass = _calculateVotesNeededToPass();
         newTokenProposals[newTokenProposalsCount] = NewTokenProposal(
             newTokenProposalsCount,
             _token,
-            block.timestamp + newTokenProposalDuration,
+            block.timestamp + NEW_TOKEN_PROPOSAL_DURATION,
             votesNeededToPass,
             0,
             1,
@@ -181,7 +181,7 @@ contract SavingsAgent is AccessControlEnumerable {
             revert ProposalNotPending();
         if (
             IERC20(proposal.token).balanceOf(address(this)) <
-            requiredTokenBalanceUponAdding
+            REQUIRED_TOKEN_BALANCE_UPON_ADDING
         ) revert InsufficientBalance();
 
         /// @dev We're doing this check here to avoid executing a new token proposal while the new token is

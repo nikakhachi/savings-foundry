@@ -47,8 +47,8 @@ contract SavingsAgentTest is Test {
         token3 = new Token("Test Token 2", "TTK", _TOKEN3_INITIAL_SUPPLY);
         savingsAgent = new SavingsAgent(_initialAgents);
         _requiredTokenBalanceUponAdding = savingsAgent
-            .requiredTokenBalanceUponAdding();
-        _newTokenProposalDuration = savingsAgent.newTokenProposalDuration();
+            .REQUIRED_TOKEN_BALANCE_UPON_ADDING();
+        _newTokenProposalDuration = savingsAgent.NEW_TOKEN_PROPOSAL_DURATION();
         token1.transfer(address(savingsAgent), _TOKEN1_INITIAL_SUPPLY);
         token2.transfer(address(savingsAgent), _TOKEN2_INITIAL_SUPPLY);
     }
