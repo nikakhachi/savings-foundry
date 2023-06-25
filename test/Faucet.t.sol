@@ -25,7 +25,7 @@ contract FaucetTest is Test {
 
     /// @dev test if the event is fired on withdrawal
     function testEvent() public {
-        vm.expectEmit(true, false, true, true);
+        vm.expectEmit(true, false, false, true);
         emit Withdraw(address(this), block.timestamp);
         faucet.withdraw();
     }
