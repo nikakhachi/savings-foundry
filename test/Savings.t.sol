@@ -282,7 +282,7 @@ contract SavingTest is Test {
         /// @dev Reverse engineering the amount address has to deposit to earn rewards that will
         /// @dev make the address premium tier
         uint depositAmountForPremiumTier = (savings
-            .totalClaimedRewardsCheckpoint() * 10000) / _TOKEN_ANNUAL_RATE;
+            .CLAIMED_REWARDS_CHECKPOINT() * 10000) / _TOKEN_ANNUAL_RATE;
         uint depositInterval = ONE_YEAR;
 
         token.approve(address(savings), depositAmountForPremiumTier);
@@ -317,7 +317,7 @@ contract SavingTest is Test {
         uint originalRewards = (depositAmountForTestingPremiumTier *
             _TOKEN_ANNUAL_RATE) / 10000;
         uint premiumTierRewards = (originalRewards *
-            savings.premiumTierInterestPercentage()) / 100;
+            savings.PREMIUM_TIER_INTEREST_PERCENTAGE()) / 100;
         assertEq(balanceState.rewards, premiumTierRewards);
     }
 }

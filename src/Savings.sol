@@ -18,7 +18,7 @@ contract Savings is SavingsAgent {
 
     /// @dev If the balance hits this number, LowBalanceAlert will be evoked.
     /// @dev TODO Can be implemented that it's unique for each token and also modifible by voting
-    uint public constant balanceAlertThreshold = 3000 * 10 ** 18;
+    uint public constant BALANCE_ALERT_THRESHOLD = 3000 * 10 ** 18;
 
     struct BalanceState {
         uint balance; /// @dev amount of token that user has deposited and is "saving"
@@ -34,15 +34,15 @@ contract Savings is SavingsAgent {
         public userBalanceStates;
 
     /// @dev if the address collects this amount or more tokens as rewards, they will be able
-    /// @dev to recieve the 120% (premiumTierInterestPercentage) of the original rate on that specific token
-    /// @dev TODO This implementation isn't perfect, because totalClaimedRewardsCheckpoint only applies
+    /// @dev to recieve the 120% (PREMIUM_TIER_INTEREST_PERCENTAGE) of the original rate on that specific token
+    /// @dev TODO This implementation isn't perfect, because CLAIMED_REWARDS_CHECKPOINT only applies
     /// @dev TODO to the rewards that been claimed and is in `totalRewardsClaimed` property, so if the address just
     /// @dev TODO deposits lots of amount of tokens and doesn't touch it for years, even though the rewards
     /// @dev TODO itself will be huge, it won't be updated in the state because the address hasn't called any
     /// @dev TODO functions that would trigger the rewards update in state. So the address wouldn't unlock Premium Tier.
     /// @dev TODO Also the decimals differ on different tokens so it's best to be different value for different tokens.
-    uint public immutable totalClaimedRewardsCheckpoint = 10 * 10 ** 18;
-    uint8 public constant premiumTierInterestPercentage = 120; /// @dev 120%
+    uint public constant CLAIMED_REWARDS_CHECKPOINT = 10 * 10 ** 18;
+    uint8 public constant PREMIUM_TIER_INTEREST_PERCENTAGE = 120; /// @dev 120%
 
     /// @dev Contract constructor calling it's parent's constructor
     /// @dev We can also implement setting of the initial tokens and their rates here
@@ -128,7 +128,7 @@ contract Savings is SavingsAgent {
         IERC20(_token).transfer(msg.sender, _amount);
         uint balance = IERC20(_token).balanceOf(address(this));
         emit ClaimRewards(msg.sender, _token, _amount);
-        if (balance <= balanceAlertThreshold)
+        if (balance <= BALANCE_ALERT_THRESHOLD)
             emit LowBalanceAlert(_token, balance, block.timestamp);
     }
 
@@ -200,11 +200,10 @@ contract Savings is SavingsAgent {
                     10000) /
                 (365 * 24 * 60 * 60); /// @dev calculating % for 1 second
             if (
-                balanceState.totalRewardsClaimed >=
-                totalClaimedRewardsCheckpoint
+                balanceState.totalRewardsClaimed >= CLAIMED_REWARDS_CHECKPOINT
             ) {
                 earnedRewards =
-                    (earnedRewards * premiumTierInterestPercentage) /
+                    (earnedRewards * PREMIUM_TIER_INTEREST_PERCENTAGE) /
                     100;
             }
         }
