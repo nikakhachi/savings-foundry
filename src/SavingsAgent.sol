@@ -4,23 +4,23 @@ pragma solidity ^0.8.13;
 import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/access/AccessControlEnumerable.sol";
 
-/// @dev Custom errors
-error InvalidToken();
-error InsufficientBalance();
-error NonAgent();
-error ProposalNotFound();
-error AlreadyVoted();
-error InvalidDelegate();
-error VotingEnded();
-error VotingInProgress();
-error ProposalNotPending();
-
 /// @title SavingsAgent
 /// @author Nika Khachiashvili
 /// @dev The contract contains variables and function for proposing and voting for adding new tokens
 /// @dev TODO Lots of other functions can also be added for voting for example updating the annual interest rate,
 /// @dev TODO adding or revoking the current agents, or even proposing a different tiers with different interest rates for tokens
 contract SavingsAgent is AccessControlEnumerable {
+    /// @dev Custom errors
+    error InvalidToken();
+    error InsufficientBalance();
+    error NonAgent();
+    error ProposalNotFound();
+    error AlreadyVoted();
+    error InvalidDelegate();
+    error VotingEnded();
+    error VotingInProgress();
+    error ProposalNotPending();
+
     event NewTokenProposed(uint proposalId);
     event NewTokenProposalVoted(
         address indexed voter,
