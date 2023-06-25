@@ -220,11 +220,11 @@ contract SavingsAgent is AccessControlEnumerable {
     }
 
     /// @notice Get any new token proposal with id
-    /// @param id the id of the proposal
+    /// @param _id the id of the proposal
     function getNewTokenProposalById(
-        uint id
+        uint _id
     ) external view returns (NewTokenProposal memory) {
-        return newTokenProposals[id];
+        return newTokenProposals[_id];
     }
 
     /// @notice Get the annual rate of the tokn
