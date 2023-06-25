@@ -182,6 +182,28 @@ contract SavingsAgentTest is Test {
         );
     }
 
+    /// @dev test voting of new token proposal with delegate
+    function testDelegateVoteNewTokenProposal() public {
+        uint proposalId = savingsAgent.newTokenProposalsCount();
+
+        savingsAgent.proposeNewToken(address(token1), 200);
+
+        vm.prank(AGENT_2);
+        savingsAgent.delegateVote(AGENT_1);
+
+        vm.prank(AGENT_1);
+        savingsAgent.voteNewToken(AGENT_2, proposalId, true);
+
+        assertEq(
+            _enumToHash(savingsAgent.agentVotes(AGENT_2, proposalId)),
+            _enumToHash(SavingsAgent.Vote.IN_FAVOR)
+        );
+        assertEq(
+            _enumToHash(savingsAgent.agentVotes(AGENT_1, proposalId)),
+            _enumToHash(SavingsAgent.Vote.NO_VOTE)
+        );
+    }
+
     /// @dev test if the event is fired when voting of new token proposal
     function testVoteNewTokenEvent() public {
         uint proposalId = savingsAgent.newTokenProposalsCount();
