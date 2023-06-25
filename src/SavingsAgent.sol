@@ -175,13 +175,6 @@ contract SavingsAgent is AccessControlEnumerable {
     function executeNewTokenProposal(uint id) external returns (bool passed) {
         NewTokenProposal storage proposal = newTokenProposals[id];
 
-        /// @dev We're doing this check here to avoid executing a new token proposal while the new token is
-        /// @dev already supported. While doing a proposal, the code checks if the token supported or not,
-        /// @dev but it doesn't check whether there is already an ongoing proposal for that token (because of gas savings,
-        /// @dev please see the comment on proposeNewToken() for more details), so it's
-        /// @dev possible from this function that double supported tokens appear, but this check prevents it.
-        if (tokenAnnualRates[proposal.token] != 0) revert InvalidToken();
-
         if (proposal.voteEndsAt == 0) revert ProposalNotFound();
         if (proposal.voteEndsAt > block.timestamp) revert VotingInProgress();
         if (proposal.status != ProposalStatus.PENDING)
@@ -190,6 +183,14 @@ contract SavingsAgent is AccessControlEnumerable {
             IERC20(proposal.token).balanceOf(address(this)) <
             requiredTokenBalanceUponAdding
         ) revert InsufficientBalance();
+
+        /// @dev We're doing this check here to avoid executing a new token proposal while the new token is
+        /// @dev already supported. While doing a proposal, the code checks if the token supported or not,
+        /// @dev but it doesn't check whether there is already an ongoing proposal for that token (because of gas savings,
+        /// @dev please see the comment on proposeNewToken() for more details), so it's
+        /// @dev possible from this function that double supported tokens appear, but this check prevents it.
+        if (tokenAnnualRates[proposal.token] != 0) revert InvalidToken();
+
         /// @dev when the voting period ends, there can be case when not all agents have voted.
         /// @dev in that case, we will decide here if the proposal failed and update the status
         if (proposal.inFavor < proposal.votesNeededToPass) {
