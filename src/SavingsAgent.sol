@@ -124,6 +124,7 @@ contract SavingsAgent is AccessControlEnumerable {
             ProposalStatus.PENDING,
             _annualRate
         );
+        agentVotes[msg.sender][newTokenProposalsCount] = Vote.IN_FAVOR;
         emit NewTokenProposed(newTokenProposalsCount);
         newTokenProposalsCount++;
     }
