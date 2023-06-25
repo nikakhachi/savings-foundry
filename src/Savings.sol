@@ -125,12 +125,12 @@ contract Savings is SavingsAgent {
             emit LowBalanceAlert(_token, balance, block.timestamp);
     }
 
-    /// @notice View total amount of rewards that the address has at the current timestamp
+    /// @notice View total amount of unclaimed rewards that the address has at the current timestamp
     /// @dev `rewards` property in balanceState is only updated on stake() or withdraw() so it doesn't show full
     /// @dev amount of rewards, so this function calculates the full rewards and returns it.
     /// @param _token token address to withdraw rewards from
     /// @return totalRewards total amount of rewards that the address got at current timestamp
-    function viewTotalRewards(
+    function viewTotalUnclaimedRewards(
         address _token
     ) external view checkToken(_token) returns (uint totalRewards) {
         BalanceState storage balanceState = userBalanceStates[msg.sender][
