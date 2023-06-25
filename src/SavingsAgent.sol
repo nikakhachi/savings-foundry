@@ -92,7 +92,7 @@ contract SavingsAgent is AccessControlEnumerable {
 
     /// @dev list and count of all the past and current token proposals
     mapping(uint => NewTokenProposal) public newTokenProposals;
-    uint newTokenProposalsCount;
+    uint public newTokenProposalsCount;
 
     /// @dev mapping keeping track of agent votes for the specific proposals
     mapping(address => mapping(uint => Vote)) public agentVotes;
