@@ -70,7 +70,10 @@ contract Savings is SavingsAgent {
         /// @dev if the address already has a deposit under this token, first calculate the rewards
         /// @dev for that balance and than update the state
         if (balanceState.lastBalanceUpdateTimestamp != 0) {
-            uint rewards = _calculateRewards(_token, balanceState);
+            uint rewards = _calculateRewardsBasedOnBalance(
+                _token,
+                balanceState
+            );
             balanceState.rewards += rewards;
         }
         balanceState.balance += _amount;
@@ -92,7 +95,7 @@ contract Savings is SavingsAgent {
             _token
         ];
         require(balanceState.balance >= _amount);
-        uint rewards = _calculateRewards(_token, balanceState);
+        uint rewards = _calculateRewardsBasedOnBalance(_token, balanceState);
         balanceState.rewards += rewards;
         balanceState.balance -= _amount;
         balanceState.lastBalanceUpdateTimestamp = block.timestamp;
@@ -133,7 +136,7 @@ contract Savings is SavingsAgent {
         BalanceState storage balanceState = userBalanceStates[msg.sender][
             _token
         ];
-        uint rewards = _calculateRewards(_token, balanceState);
+        uint rewards = _calculateRewardsBasedOnBalance(_token, balanceState);
         totalRewards = rewards + balanceState.rewards;
     }
 
@@ -176,7 +179,7 @@ contract Savings is SavingsAgent {
     /// @param _token token address
     /// @param balanceState struct of the BalanceState
     /// @return earnedRewards final calculated rewards earned
-    function _calculateRewards(
+    function _calculateRewardsBasedOnBalance(
         address _token,
         BalanceState memory balanceState
     ) private view returns (uint earnedRewards) {
