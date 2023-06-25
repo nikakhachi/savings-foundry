@@ -320,4 +320,40 @@ contract SavingTest is Test {
             savings.PREMIUM_TIER_INTEREST_PERCENTAGE()) / 100;
         assertEq(balanceState.rewards, premiumTierRewards);
     }
+
+    /// @dev tests if the contract will fire the event on low balance
+    function testLowBalanceAlertEvent() public {
+        /// @dev Reverse engineering the amount we need to deposit that will trigger the low balance event
+        /// @dev when withdraw and claim rewards after 1 year
+        uint rewardsToGiveToTriggerEvent = _TOKEN_INITIAL_CONTRACT_SUPPLY -
+            savings.BALANCE_ALERT_THRESHOLD();
+
+        /// @dev Instead of depositing HUGE amount to drain the contract, I'll just send the tokens from contract to some address
+        /// @dev So that the dposit amount will be minimum to trigger the low balance alert
+        /// @dev Here you will see that giving out only 10 tokens will now trigger the alert.
+        uint delta = 10;
+        uint wastedAmount = rewardsToGiveToTriggerEvent - delta;
+        vm.prank(address(savings));
+        token.transfer(address(123), wastedAmount);
+
+        /// @dev Reverse engineering how many tokens to deposit for a year to make contract pay the delta (10) amount and trigger the event
+        uint amountToDeposit = (delta * 10000) / _TOKEN_ANNUAL_RATE;
+
+        token.approve(address(savings), amountToDeposit);
+        savings.deposit(address(token), amountToDeposit);
+
+        skip(_ONE_YEAR);
+
+        savings.withdraw(address(token), amountToDeposit);
+
+        uint rewardsToClaim = (amountToDeposit * _TOKEN_ANNUAL_RATE) / 10000;
+
+        vm.expectEmit(true, false, false, true);
+        emit LowBalanceAlert(
+            address(token),
+            token.balanceOf(address(savings)) - rewardsToClaim,
+            block.timestamp
+        );
+        savings.claimRewards(address(token), rewardsToClaim);
+    }
 }
