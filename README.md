@@ -14,6 +14,7 @@ The project is ongoing and there are lots of things that can be implemented. Som
 
 ## Features
 
+- Users can deposit into the contract (any supported token by the contract), hold it, and earn annual interest (the rate differs on every token).
 - Premium Tier is available for the users that will earn more than a certain amount of rewards. Premium tier users enjoy increased interest rates by 20%.
 - The contract operates on the voting system. Agents of the contract can only add new tokens through voting. Delegates are available.
 - In order for new token proposals to be proposed or executed, the contract must have some specific minimum amount to ensure safe interest giving.
